@@ -1,6 +1,15 @@
 import { Schema, model, Document, Types } from "mongoose";
 
 export type ChallengeStatus = "active" | "cancelled" | "completed";
+export type QuitRequestStatus = "pending" | "cancelled_by_user";
+
+export interface IQuitRequest {
+  requestedAt: Date;
+  unlocksAt: Date;
+  feeling: string;
+  status: QuitRequestStatus;
+  cancelledAt: Date | null;
+}
 
 export interface IChallenge extends Document {
   _id: Types.ObjectId;
@@ -14,7 +23,19 @@ export interface IChallenge extends Document {
   cancelledAt: Date | null;
   completedAt: Date | null;
   createdAt: Date;
+  quitRequest: IQuitRequest | null;
 }
+
+const quitRequestSchema = new Schema<IQuitRequest>(
+  {
+    requestedAt: { type: Date, required: true },
+    unlocksAt: { type: Date, required: true },
+    feeling: { type: String, required: true, trim: true, maxlength: 1000 },
+    status: { type: String, enum: ["pending", "cancelled_by_user"], default: "pending" },
+    cancelledAt: { type: Date, default: null },
+  },
+  { _id: false }
+);
 
 const challengeSchema = new Schema<IChallenge>(
   {
@@ -27,11 +48,11 @@ const challengeSchema = new Schema<IChallenge>(
     endsAt: { type: Date, required: true },
     cancelledAt: { type: Date, default: null },
     completedAt: { type: Date, default: null },
+    quitRequest: { type: quitRequestSchema, default: null },
   },
   { timestamps: { createdAt: "createdAt", updatedAt: false } }
 );
 
-// Index to quickly find active challenge for a user
 challengeSchema.index({ userId: 1, status: 1 });
 
 export const Challenge = model<IChallenge>("Challenge", challengeSchema);
