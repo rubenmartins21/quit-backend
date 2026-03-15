@@ -6,6 +6,7 @@ import { connectDB } from "./config/db.js";
 import authRoutes from "./routes/auth.routes.js";
 import userRoutes from "./routes/user.routes.js";
 import challengeRoutes from "./routes/challenge.routes.js";
+import feedbackRoutes from "./routes/feedback.routes.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 
 async function bootstrap() {
@@ -18,7 +19,7 @@ async function bootstrap() {
 
   // ─── CORS — only allow Electron's custom protocol and localhost (dev) ───────
   const allowedOrigins = [
-    "app://quit",            // Electron production (custom protocol)
+    "app://quit", // Electron production (custom protocol)
     "http://localhost:5173", // Vite dev server
     "http://localhost:3000",
   ];
@@ -34,7 +35,7 @@ async function bootstrap() {
         }
       },
       credentials: true,
-    })
+    }),
   );
 
   // ─── Body parsing ──────────────────────────────────────────────────────────
@@ -45,6 +46,7 @@ async function bootstrap() {
   app.use("/auth", authRoutes);
   app.use("/", userRoutes);
   app.use("/challenges", challengeRoutes);
+  app.use("/feedback", feedbackRoutes);
 
   // ─── Health check ─────────────────────────────────────────────────────────
   app.get("/health", (_req, res) => {
